@@ -146,13 +146,15 @@
 
     <nav
       aria-label="Page navigation"
-      class="mb-5 d-flex justify-content-center pagination-nav"
+      class="mb-5 d-flex justify-content-center"
     >
-      <button class="btn btn-primary rounded-end-0 prevButton disabled">
-        Previous
-      </button>
-      <ul class="pagination my-0 mx-1 gap-1"></ul>
-      <button class="btn btn-primary rounded-start-0 nextButton">Next</button>
+      <div class="d-inline-flex pagination-nav">
+        <button class="btn btn-primary rounded-end-0 prevButton disabled">
+          Previous
+        </button>
+        <ul class="pagination my-0 mx-1 gap-1"></ul>
+        <button class="btn btn-primary rounded-start-0 nextButton">Next</button>
+      </div>
     </nav>
 
     <!-- footer -->
@@ -219,7 +221,9 @@
     <script src="./node_modules/@popperjs/core/dist/umd/popper.min.js"></script>
     <!-- bootstrap js -->
     <script src="./node_modules/bootstrap/dist/js/bootstrap.min.js"></script>
-    <!-- <script src="./src/js/theme.js"></script> -->
-    <script src="./src/js/main.js"></script>
+    <!-- custom js files -->
+    <script type="module" src="./src/js/index.js" defer></script>
+    <script type="module" src="./src/js/services.js" defer></script>
+    <script src="./src/js/theme.js"></script>
   </body>
 </html>

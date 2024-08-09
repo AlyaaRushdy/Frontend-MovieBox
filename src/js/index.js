@@ -1,4 +1,6 @@
-let page = 1;
+import { genreIdToName } from "./services.staticLists.js";
+import { getMovies, getSearchResults } from "./services.js";
+
 const navbar = document.querySelector(".navbar");
 const searchBtn = document.querySelector(".search-btn");
 const carousel = document.querySelector(".carousel");
@@ -9,82 +11,12 @@ const paginationList = document.querySelector(".pagination");
 const paginationNav = document.querySelector(".pagination-nav");
 const prevButton = document.querySelector(".prevButton");
 const nextButton = document.querySelector(".nextButton");
-const detailsDiv = document.querySelector(".details");
+let page = 1;
+let searchPage = 1;
+let requestType;
 
-// get request headers
-const options = {
-  method: "GET",
-  headers: {
-    accept: "application/json",
-    Authorization:
-      "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJiNTA2ZGRkNjExM2Q5MDgzZWU5MjdlM2VhNDdjYzgyNSIsIm5iZiI6MTcyMDQ0NTk3NC40NDA1NzEsInN1YiI6IjY2OGE2YmU0NWUxZGYzYWQzMTU3ZWFlMSIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.yF88ur3H_q8MhuIdcuuTCCOOX1OxzXz4DiVjlMVhEaI",
-  },
-};
-
-//fetching the genre list from the api
-async function getGenresList() {
-  const genreList = await fetch(
-    "https://api.themoviedb.org/3/genre/movie/list?language=en",
-    options
-  )
-    .then((response) => response.json())
-    .then((response) => response.genres)
-    .catch((err) => console.error(err));
-  return genreList;
-}
-// saving the genres array to a variable to avoid sending get requests
-const genresList = (async () => {
-  const list = await getGenresList().then((response) => response);
-  return list;
-})();
-// return genra name from id
-async function genreIdToName(id) {
-  let genres = await genresList;
-  for (const obj of genres) {
-    if (id === obj.id) {
-      return obj.name;
-    }
-  }
-}
-
-// fetch movies from api
-async function getMovies() {
-  const baseURL = `https://api.themoviedb.org/3/movie/popular?page=${page}`;
-
-  let movies = await fetch(baseURL, options)
-    .then((response) => response.json())
-    .then((response) => {
-      totalPages = response.total_pages;
-      results = response.results;
-      return { results, totalPages };
-    })
-    .catch((err) => console.error(err));
-  return movies;
-}
-
-// fetch search results from api
-async function getSearchResults(searchQuery) {
-  const baseURL = `https://api.themoviedb.org/3/search/movie?query=${searchQuery}`;
-
-  let movies = await fetch(baseURL, options)
-    .then((response) => response.json())
-    .then((response) => {
-      totalPages = response.total_pages;
-      results = response.results;
-      return { results, totalPages };
-    })
-    .catch((err) => console.error(err));
-  return movies;
-}
-
-async function showMovies() {
-  let { movies = results, totalPages } = await getMovies().then((res) => res);
-
+async function showMovies(movies) {
   async function carousel() {
-    // const { movies = results, totalPages } = await getMovies().then(
-    //   (res) => res
-    // );
-
     for (let i = 0; i < 3; i++) {
       const carouselItemDiv = document.createElement("div");
       carouselItemDiv.classList.add("carousel-item");
@@ -132,21 +64,7 @@ async function showMovies() {
     carouselInner.firstChild.classList.add("active");
   }
 
-  async function cards(numOfTotalPages, moviesArray) {
-    // let movies;
-    // if (arguments.length === 0) {
-    //   movies = await getMovies();
-    // } else {
-    //   movies = moviesArray;
-    // }
-
-    if (arguments.length == 2) {
-      movies = moviesArray;
-      totalPages = numOfTotalPages;
-    } else if (arguments.length != 0) {
-      totalPages = numOfTotalPages;
-    }
-
+  async function cards() {
     cardsContainer.innerHTML = "";
 
     for (const movie of movies) {
@@ -197,93 +115,170 @@ async function showMovies() {
         `;
       cardsContainer.appendChild(card);
     }
-    // pagination(totalPages);
   }
 
   return { carousel: carousel, cards: cards };
 }
 
-async function pagination(totalPages) {
+async function pagination(totalPages, reqType, searchQuery) {
   console.log(`total pages = ${totalPages}`);
+  console.log(reqType);
+  pagesNumbers(searchPage, totalPages);
 
   paginationNav.addEventListener("click", async (event) => {
-    console.log(page);
-
     if (event.target === nextButton) {
-      page++;
-      await showMovies().then((response) => {
-        response.cards();
-        scrollToCardsStart();
-      });
+      if (reqType === "search") {
+        searchPage++;
+        let { searchResults, totalPages } = await getSearchResults(
+          searchQuery,
+          searchPage
+        );
+        await showMovies(searchResults, totalPages).then((response) => {
+          response.cards();
+          pagesNumbers(searchPage, totalPages);
+        });
+      } else if (reqType === "allMovies") {
+        page++;
+        let { movies, totalPages } = await getMovies(page);
+        await showMovies(movies, totalPages).then((response) => {
+          response.cards();
+          pagesNumbers(page, totalPages);
+        });
+      }
+      cardsHeading.scrollIntoView();
+      disablePrevAndNextButtons(totalPages);
     } else if (event.target === prevButton) {
-      page--;
-      await showMovies().then((response) => {
-        response.cards();
-        scrollToCardsStart();
-      });
-    }
-
-    if (page === 1) {
-      prevButton.classList.add("disabled");
-    } else if (page === totalPages) {
-      nextButton.classList.add("disabled");
+      if (reqType === "search") {
+        searchPage--;
+        let { searchResults, totalPages } = await getSearchResults(
+          searchQuery,
+          searchPage
+        );
+        await showMovies(searchResults, totalPages).then((response) => {
+          response.cards();
+          pagesNumbers(searchPage, totalPages);
+        });
+      } else if (reqType === "allMovies") {
+        page--;
+        let { movies, totalPages } = await getMovies(page);
+        await showMovies(movies, totalPages).then((response) => {
+          response.cards();
+          pagesNumbers(page, totalPages);
+        });
+      }
+      cardsHeading.scrollIntoView();
+      disablePrevAndNextButtons(totalPages);
+    } else if (event.target.classList.contains("page-num")) {
+      if (reqType === "search") {
+        if (Number(event.target.textContent) === searchPage) {
+          return;
+        } else {
+          searchPage = Number(event.target.textContent);
+          let { searchResults, totalPages } = await getSearchResults(
+            searchQuery,
+            searchPage
+          );
+          await showMovies(searchResults, totalPages).then((response) => {
+            response.cards();
+            pagesNumbers(searchPage, totalPages);
+          });
+        }
+      } else if (reqType === "allMovies") {
+        if (Number(event.target.textContent) === page) {
+          return;
+        } else {
+          page = Number(event.target.textContent);
+          let { movies, totalPages } = await getMovies(page);
+          await showMovies(movies, totalPages).then((response) => {
+            response.cards();
+            pagesNumbers(page, totalPages);
+          });
+        }
+      }
+      cardsHeading.scrollIntoView();
+      disablePrevAndNextButtons(totalPages);
     } else {
-      prevButton.classList.remove("disabled");
-      nextButton.classList.remove("disabled");
+      return;
     }
+  });
 
-    console.log(event.target.textContent);
-    console.log(page);
-  });
-}
-//* scroll to top
-function scrollToCardsStart() {
-  let vh = document.documentElement.clientHeight;
-  window.scrollTo({
-    top: vh - (20 * vh) / 100,
-    behavior: "smooth",
-  });
+  disablePrevAndNextButtons(totalPages);
 }
 
-//* change color mode
-const colorSchemeToggler = document.querySelector("#color-scheme-toggler");
-colorSchemeToggler.addEventListener("click", function () {
-  console.log("clicked!");
-  if (document.documentElement.classList.contains("dark")) {
-    document.documentElement.classList.remove("dark");
-    colorSchemeToggler.childNodes[1].classList.remove("fa-sun");
-    colorSchemeToggler.childNodes[1].classList.add("fa-moon");
+function pagesNumbers(currentPage, totalPages) {
+  paginationList.innerHTML = "";
+  if (totalPages - 2 < currentPage + 2 && totalPages >= 5) {
+    for (let i = totalPages - 4; i <= totalPages; i++) {
+      const li = document.createElement("li");
+      li.classList = i === currentPage ? "page-item active" : "page-item";
+      li.innerHTML = `<button class="btn btn-outline-primary page-num">${i}</button>`;
+      paginationList.appendChild(li);
+    }
+    console.log("in total-2<cu+2");
+  } else if (currentPage >= 3 && totalPages >= 5) {
+    for (let i = currentPage - 2; i <= currentPage + 2; i++) {
+      const li = document.createElement("li");
+      li.classList = i === currentPage ? "page-item active" : "page-item";
+      li.innerHTML = `<button class="btn btn-outline-primary page-num">${i}</button>`;
+      paginationList.appendChild(li);
+    }
+    console.log("in current>3");
+  } else if (totalPages >= 5) {
+    for (let i = 1; i <= 5; i++) {
+      const li = document.createElement("li");
+      li.classList = i === currentPage ? "page-item active" : "page-item";
+      li.innerHTML = `<button class="btn btn-outline-primary page-num">${i}</button>`;
+      paginationList.appendChild(li);
+    }
+    console.log("in total>5");
   } else {
-    document.documentElement.classList.add("dark");
-    colorSchemeToggler.childNodes[1].classList.remove("fa-moon");
-    colorSchemeToggler.childNodes[1].classList.add("fa-sun");
+    for (let i = 1; i <= totalPages; i++) {
+      const li = document.createElement("li");
+      li.classList = i === currentPage ? "page-item active" : "page-item";
+      li.innerHTML = `<button class="btn btn-outline-primary page-num">${i}</button>`;
+      paginationList.appendChild(li);
+    }
+    console.log("in else");
   }
-});
+}
 
-// function setMovieIdToLocalStorage(id) {
-//   localStorage.setItem("movieId", id);
-//   console.log("added!");
-// }
-// localStorage.clear();
+function disablePrevAndNextButtons(totalPages) {
+  if (page === 1 && searchPage === 1) {
+    prevButton.classList.add("disabled");
+  } else {
+    prevButton.classList.remove("disabled");
+  }
+
+  if (page === totalPages && searchPage === totalPages) {
+    nextButton.classList.add("disabled");
+  } else {
+    nextButton.classList.remove("disabled");
+  }
+}
 
 document.addEventListener("DOMContentLoaded", async function () {
-  await showMovies().then((response) => {
+  let { movies, totalPages } = await getMovies(page);
+  requestType = "allMovies";
+  await showMovies(movies, totalPages).then((response) => {
     response.carousel();
     response.cards();
-    pagination();
+    pagination(totalPages, requestType);
   });
 });
 
 searchBtn.addEventListener("click", async function (event) {
   event.preventDefault();
 
+  searchPage = 1;
   const searchQuery = document.querySelector(".search-input").value;
   if (searchQuery) {
-    const { searchResults = results, totalPages } = await getSearchResults(
-      searchQuery
-    ).then((res) => res);
+    const { searchResults, totalPages } = await getSearchResults(
+      searchQuery,
+      searchPage
+    );
 
-    await showMovies().then((response) => {
+    requestType = "search";
+    await showMovies(searchResults, totalPages).then((response) => {
       navbar.classList.remove("position-absolute", "bg-transparent");
       navbar.classList.add("position-relative", "bg-primary");
       document
@@ -291,8 +286,8 @@ searchBtn.addEventListener("click", async function (event) {
         .classList.remove("bg-primary", "bg-gradient");
       carousel.remove();
       cardsHeading.textContent = `Search results for: ${searchQuery}`;
-      response.cards(totalPages, searchResults);
-      pagination(totalPages);
+      response.cards();
+      pagination(totalPages, requestType, searchQuery);
     });
   }
 });
