@@ -1,8 +1,20 @@
 {
-  "dependencies": {
+  "name": "moviebox",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  }, 
+ "dependencies": {
     "@emailjs/browser": "^4.4.1",
     "@fortawesome/fontawesome-free": "^6.5.2",
     "bootstrap": "^5.3.3",
     "sweetalert2": "^11.12.4"
+  },
+  "devDependencies": {
+    "vite": "^5.4.1"
   }
 }
