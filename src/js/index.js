@@ -1,5 +1,6 @@
 import { genreIdToName } from "./services.staticLists.js";
 import { getMovies, getSearchResults } from "./services.js";
+import placeholderImg from "./src/images/placeholder.jpg";
 
 const navbar = document.querySelector(".navbar");
 const searchBtn = document.querySelector(".search-btn");
@@ -85,7 +86,7 @@ async function showMovies(movies) {
               src=${
                 movie.poster_path
                   ? `http://image.tmdb.org/t/p/w500/${movie.poster_path}`
-                  : `./src/images/placeholder.jpg`
+                  : placeholderImg
               }
               class="card-img-top"
               alt="${movie.title} image"
