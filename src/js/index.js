@@ -1,6 +1,8 @@
 import { genreIdToName } from "./services.staticLists.js";
 import { getMovies, getSearchResults } from "./services.js";
 import placeholderImg from "../images/placeholder.jpg";
+import "../../node_modules/@popperjs/core/dist/umd/popper.js";
+import "bootstrap";
 
 const navbar = document.querySelector(".navbar");
 const searchBtn = document.querySelector(".search-btn");

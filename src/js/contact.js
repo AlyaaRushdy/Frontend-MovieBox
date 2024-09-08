@@ -1,4 +1,9 @@
-emailjs.init({
+import Swal from "sweetalert2";
+import { sendForm, init } from "@emailjs/browser";
+import "../../node_modules/@popperjs/core/dist/umd/popper";
+import "bootstrap";
+
+init({
   publicKey: "KzBHA4lsho3ngb2vi",
 });
 
@@ -12,7 +17,7 @@ window.onload = function () {
     .addEventListener("submit", function (event) {
       event.preventDefault();
       if (nameInput.value && mailInput.value && messageInput.value) {
-        emailjs.sendForm("service_8s8wmll", "template_i52j67k", this).then(
+        sendForm("service_8s8wmll", "template_i52j67k", this).then(
           () => {
             Swal.fire({
               title: "Success",
@@ -41,18 +46,3 @@ window.onload = function () {
       }
     });
 };
-
-//* change color mode
-const colorSchemeToggler = document.querySelector("#color-scheme-toggler");
-colorSchemeToggler.addEventListener("click", function () {
-  console.log("clicked!");
-  if (document.documentElement.classList.contains("dark")) {
-    document.documentElement.classList.remove("dark");
-    colorSchemeToggler.childNodes[1].classList.remove("fa-sun");
-    colorSchemeToggler.childNodes[1].classList.add("fa-moon");
-  } else {
-    document.documentElement.classList.add("dark");
-    colorSchemeToggler.childNodes[1].classList.remove("fa-moon");
-    colorSchemeToggler.childNodes[1].classList.add("fa-sun");
-  }
-});
