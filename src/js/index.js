@@ -1,6 +1,6 @@
 import { genreIdToName } from "./services.staticLists.js";
 import { getMovies, getSearchResults } from "./services.js";
-import placeholderImg from "./src/images/placeholder.jpg";
+import placeholderImg from "../images/placeholder.jpg";
 
 const navbar = document.querySelector(".navbar");
 const searchBtn = document.querySelector(".search-btn");
