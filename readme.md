@@ -5,7 +5,7 @@ this is a movies website that displays popular movies and their details.
 <table>
  <tr>
     <th >light</th>
-    <th >| dark</th>
+    <th >dark</th>
   </tr>
   <tr>
     <td><img src="./screenshots/desktop main-page light mode.png"></td>
