@@ -3,7 +3,7 @@
   --text-main-color-inverted: white;
   --text-main-color-muted: rgb(85, 85, 85);
   --bg-main-color: white;
-  --bs-primary: #e1204b;
+  --bs-primary: blue;
   --bs-primary-rgb: 225, 32, 75;
 }
 :root.dark {
@@ -134,4 +134,9 @@ body {
   .navbar-collapse {
     background: transparent !important;
   }
+}
+
+::-webkit-scrollbar-track {
+  color: #e1204b;
+  background-color: red;
 }
