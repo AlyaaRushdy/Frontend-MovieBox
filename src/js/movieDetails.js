@@ -1,4 +1,5 @@
 import { getMovieDetails } from "./services.js";
+import placeholderImg from "../images/placeholder.jpg";
 
 import {
   languageCodeToName,
@@ -69,7 +70,7 @@ async function showMovieDetails(movieDetails) {
             src=${
               movieDetails.poster_path
                 ? `http://image.tmdb.org/t/p/w500/${movieDetails.poster_path}`
-                : `../images/placeholder.jpg`
+                : placeholderImg
             }
             alt="${movieDetails.title}"
             class="h-100 w-100 rounded-3"
